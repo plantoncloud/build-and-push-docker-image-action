@@ -1,0 +1,26 @@
+name: Docker Build and Push
+
+inputs:
+  docker_repo_hostname:
+    description: 'Hostname of the Docker repository'
+    required: true
+  container_image_repo:
+    description: 'Repo of the Docker image to be built and pushed.'
+    required: true
+  container_image_tag:
+    description: 'Tag of the Docker image to be built and pushed.'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Construct Docker Image Reference
+      run: echo "DOCKER_IMAGE_FULL_REF=${{ inputs.docker_repo_hostname }}/${{ inputs.container_image_repo }}:${{ inputs.container_image_tag }}" >> $GITHUB_ENV
+
+    - name: Build Docker Image
+      run: docker build -t ${{ env. DOCKER_IMAGE_FULL_REF }} .
+      shell: bash
+
+    - name: Push Docker Image
+      run: docker push ${{ env. DOCKER_IMAGE_FULL_REF }}
+      shell: bash
