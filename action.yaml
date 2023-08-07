@@ -14,14 +14,26 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2.9.1
+
+    - name: Cache Docker layers
+      uses: actions/cache@v3.3.1
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+
     - name: Construct Docker Image Reference
       run: echo "DOCKER_IMAGE_FULL_REF=${{ inputs.docker_repo_hostname }}/${{ inputs.container_image_repo }}:${{ inputs.container_image_tag }}" >> $GITHUB_ENV
       shell: bash
 
-    - name: Build Docker Image
-      run: docker build -t ${{ env. DOCKER_IMAGE_FULL_REF }} .
-      shell: bash
-
-    - name: Push Docker Image
-      run: docker push ${{ env. DOCKER_IMAGE_FULL_REF }}
-      shell: bash
+    - name: Build and push
+      uses: docker/build-push-action@v4.4.1
+      with:
+        context: .
+        push: true
+        tags: ${{ env.DOCKER_IMAGE_FULL_REF }}
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache
