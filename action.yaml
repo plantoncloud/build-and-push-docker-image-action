@@ -26,7 +26,7 @@ runs:
           ${{ runner.os }}-buildx-
 
     - name: Construct Docker Image Reference
-      run: echo "DOCKER_IMAGE_FULL_REF${{ inputs.container_image_repo }}:${{ inputs.container_image_tag }}" >> $GITHUB_ENV
+      run: echo "DOCKER_IMAGE_FULL_REF=${{ inputs.container_image_repo }}:${{ inputs.container_image_tag }}" >> $GITHUB_ENV
       shell: bash
 
     - name: Build and push
